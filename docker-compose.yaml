@@ -1,0 +1,58 @@
+version: "3.0"
+
+services:
+  onepixel:
+    container_name: onepixel
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    links:
+      - postgres
+
+  postgres:
+    container_name: postgres
+    image: postgres:15-alpine
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: onepixel
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 3s
+      timeout: 3s
+      retries: 3
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+
+  clickhouse:
+    container_name: clickhouse
+    image: clickhouse/clickhouse-server
+    volumes:
+      - ./clk_data:/var/lib/clickhouse
+      - ./clk_logs:/var/log/clickhouse-server
+    environment:
+      CLICKHOUSE_USER: clickhouse
+      CLICKHOUSE_PASSWORD: clickhouse
+      CLICKHOUSE_DB: onepixel
+    healthcheck:
+      test: [ "CMD-SHELL", "clickhouse-client --user=clickhouse --password=clickhouse --query=\"SELECT 1\"" ]
+      interval: 3s
+      timeout: 3s
+      retries: 3
+    expose:
+      - "8123"
+      - "9000"
+    ports:
+      - "8123:8123"
+      - "9000:9000"

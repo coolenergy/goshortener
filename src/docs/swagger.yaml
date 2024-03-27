@@ -1,0 +1,285 @@
+basePath: /api/v1
+definitions:
+  dtos.CreateUrlRequest:
+    properties:
+      long_url:
+        type: string
+    type: object
+  dtos.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  dtos.ErrorResponse:
+    properties:
+      message:
+        example: Something went wrong
+        type: string
+      status:
+        example: 400
+        type: integer
+    type: object
+  dtos.LoginUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  dtos.UrlResponse:
+    properties:
+      creator_id:
+        example: 1
+        type: integer
+      long_url:
+        example: https://www.google.com
+        type: string
+      short_url:
+        example: nhg145
+        type: string
+    type: object
+  dtos.UserResponse:
+    properties:
+      email:
+        example: user@test.com
+        type: string
+      id:
+        example: 1
+        type: integer
+      token:
+        example: <JWT_TOKEN>
+        type: string
+    type: object
+host: onepixel.link
+info:
+  contact:
+    email: dev@championswimmer.in
+    name: Arnav Gupta
+  description: "## About\n\n`1px.li` is an URL shortener created by [Arnav Gupta](https://twitter.com/championswimmer)\n\n-
+    Source Code: <https://github.com/championswimmer/onepixel_backend> \n- Admin API:
+    <https://onepixel.link/api/v1/>\n- API Docs: <https://onepixel.link/docs/> \n\n###
+    Purchase Subscription\n\nUsing `onepixel` requires a subscription. You can purchase
+    a subscription below using either Stripe or RazorPay\n\n[![Purchase](https://img.shields.io/badge/Purchase-slateblue?style=for-the-badge&logo=stripe&logoColor=white)](https://buy.stripe.com/bIY7tIfvucSv94A6oo)\n[![Purchase](https://img.shields.io/badge/Purchase-dodgerblue?style=for-the-badge&logo=razorpay&logoColor=white)](https://rzp.io/l/1pxli_1y)\n\nOnce
+    you purchase a subscription, you'll receive an email with details of your account
+    within 2-3 business days.\n"
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://github.com/championswimmer/onepixel_backend
+  title: onepixel API
+  version: "0.1"
+paths:
+  /urls:
+    get:
+      consumes:
+      - application/json
+      description: Get all urls
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetAllUsers
+          schema:
+            type: string
+      security:
+      - BearerToken: []
+      summary: Get all urls
+      tags:
+      - urls
+    post:
+      consumes:
+      - application/json
+      description: Create random short url
+      operationId: create-random-url
+      parameters:
+      - description: Url
+        in: body
+        name: url
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateUrlRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.UrlResponse'
+        "400":
+          description: The request body is not valid
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "422":
+          description: long_url is required to create url
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - BearerToken: []
+      summary: Create random short url
+      tags:
+      - urls
+  /urls/{shortcode}:
+    put:
+      consumes:
+      - application/json
+      description: Create specific short url
+      operationId: create-specific-url
+      parameters:
+      - description: Shortcode
+        in: path
+        name: shortcode
+        required: true
+        type: string
+      - description: Url
+        in: body
+        name: url
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateUrlRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.UrlResponse'
+        "400":
+          description: The request body is not valid
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "403":
+          description: Shortcode is not allowed
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "409":
+          description: Shortcode already exists
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "422":
+          description: long_url is required to create url
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - BearerToken: []
+      summary: Create specific short url
+      tags:
+      - urls
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Register new user
+      operationId: register-user
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.UserResponse'
+        "400":
+          description: The request body is not valid
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "409":
+          description: User with this email already exists
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "422":
+          description: email and password are required to create user
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - APIKeyAuth: []
+      summary: Register new user
+      tags:
+      - users
+  /users/{userid}:
+    get:
+      consumes:
+      - application/json
+      description: Get user info
+      operationId: get-user-info
+      parameters:
+      - description: User ID
+        in: path
+        name: userid
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Get user info
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      description: Update user info
+      operationId: update-user-info
+      parameters:
+      - description: User ID
+        in: path
+        name: userid
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Update user info
+      tags:
+      - users
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Login user
+      operationId: login-user
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.LoginUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.UserResponse'
+        "401":
+          description: Invalid email or password
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Login user
+      tags:
+      - users
+schemes:
+- http
+- https
+securityDefinitions:
+  APIKeyAuth:
+    in: header
+    name: X-API-Key
+    type: apiKey
+  BearerToken:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
+tags:
+- description: Operations about users
+  name: users
+- description: Operations about urls
+  name: urls
